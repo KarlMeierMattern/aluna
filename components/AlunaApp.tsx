@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
+import { AppNav } from "@/components/AppNav";
 import { Background } from "@/components/Background";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
@@ -9,7 +10,9 @@ import { CycleRing } from "@/components/CycleRing";
 import { HormoneCard } from "@/components/HormoneCard";
 import { SymptomCells } from "@/components/SymptomCells";
 import { CycleHistory } from "@/components/CycleHistory";
-import { SettingsSheet } from "@/components/SettingsSheet";
+import { DailyNote } from "@/components/DailyNote";
+import { InsightsView } from "@/components/insights/InsightsView";
+import { SettingsHub, type SheetView } from "@/components/SettingsHub";
 import { DEFAULT_SYMPTOMS } from "@/lib/cycle/phases";
 import {
   getCycleSnapshot,
@@ -21,15 +24,19 @@ import {
 import { loadState, saveState, exportState, importState } from "@/lib/db/indexed";
 import type { AlunaState } from "@/lib/db/types";
 import { BC_TYPES } from "@/lib/cycle/bc";
+import { syncReminderSchedule } from "@/lib/sync/client";
+import { updatePushPrefs, hasPushSubscription } from "@/lib/push/client";
 
 export function AlunaApp() {
   const { data: session } = useSession();
   const userId = session?.user?.id;
   const [state, setState] = useState<AlunaState | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetView, setSheetView] = useState<SheetView | null>(null);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
+  const [dailyNote, setDailyNote] = useState("");
   const [saveVisible, setSaveVisible] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<"today" | "insights">("today");
 
   useEffect(() => {
     if (!userId) return;
@@ -37,6 +44,7 @@ export function AlunaApp() {
       setState(s);
       const t = iso(today());
       setSelectedSymptoms(s.logs[t]?.symptoms ?? []);
+      setDailyNote(s.logs[t]?.note ?? "");
       setLoading(false);
     });
   }, [userId]);
@@ -71,10 +79,16 @@ export function AlunaApp() {
     : "rising";
 
   const persist = useCallback(
-    async (next: AlunaState) => {
+    async (next: AlunaState, sync = true) => {
       if (!userId) return;
       setState(next);
       await saveState(userId, next);
+      if (sync) {
+        await syncReminderSchedule(next);
+        if (await hasPushSubscription()) {
+          await updatePushPrefs(next.notifPrefs);
+        }
+      }
     },
     [userId]
   );
@@ -86,7 +100,11 @@ export function AlunaApp() {
       ...state,
       logs: {
         ...state.logs,
-        [t]: { ...(state.logs[t] || {}), symptoms: selectedSymptoms },
+        [t]: {
+          ...(state.logs[t] || { symptoms: [] }),
+          symptoms: selectedSymptoms,
+          ...(dailyNote.trim() ? { note: dailyNote.trim() } : {}),
+        },
       },
     };
     await persist(next);
@@ -121,14 +139,16 @@ export function AlunaApp() {
       const imported = await importState(userId, text);
       setState(imported);
       setSelectedSymptoms(imported.logs[iso(today())]?.symptoms ?? []);
+      setDailyNote(imported.logs[iso(today())]?.note ?? "");
+      await syncReminderSchedule(imported);
     };
     input.click();
   }
 
   if (loading || !state || !snapshot) {
     return (
-      <div className="wrap">
-        <p style={{ opacity: 0.7, textAlign: "center", marginTop: 40 }}>Loading…</p>
+      <div className="app-shell">
+        <p className="app-loading">Loading…</p>
       </div>
     );
   }
@@ -141,64 +161,82 @@ export function AlunaApp() {
   return (
     <>
       <Background bg={bg} mood={mood} />
-      <div className="wrap">
-        <Header onSettings={() => setSheetOpen(true)} />
-        <Hero snapshot={snapshot} />
-        <CycleRing snapshot={snapshot} cycleLen={state.cycleLen} />
-        <HormoneCard
-          snapshot={snapshot}
-          cycleLen={state.cycleLen}
-          detail={state.detail}
-          onToggleDetail={() => persist({ ...state, detail: !state.detail })}
-        />
-        {showFertile && (
-          <>
-            <h2 className="section-title">Fertile window</h2>
-            <div className="info-card">
-              <div className="ic-body">
-                Estimated fertile days: <strong>day {fertile.startDay}</strong> to{" "}
-                <strong>day {fertile.endDay}</strong> (ovulation ~day{" "}
-                {fertile.ovulationDay}). Estimates only — not contraception.
+      <div className="app-shell">
+        <AppNav tab={tab} onChange={setTab} />
+        <main className="app-main">
+          <div className="wrap">
+            <Header onSettings={() => setSheetView("menu")} />
+            {tab === "today" ? (
+              <div className="today-layout">
+                <div className="today-col today-col-hero">
+                  <Hero snapshot={snapshot} />
+                  <CycleRing snapshot={snapshot} cycleLen={state.cycleLen} />
+                  <h2 className="section-title">This cycle</h2>
+                  <CycleHistory state={state} />
+                </div>
+                <div className="today-col today-col-log">
+                  <HormoneCard
+                    snapshot={snapshot}
+                    cycleLen={state.cycleLen}
+                    detail={state.detail}
+                    onToggleDetail={() =>
+                      persist({ ...state, detail: !state.detail }, false)
+                    }
+                  />
+                  {showFertile && (
+                    <>
+                      <h2 className="section-title">Fertile window</h2>
+                      <div className="info-card">
+                        <div className="ic-body">
+                          Estimated fertile days:{" "}
+                          <strong>day {fertile.startDay}</strong> to{" "}
+                          <strong>day {fertile.endDay}</strong> (ovulation ~day{" "}
+                          {fertile.ovulationDay}). Estimates only — not
+                          contraception.
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  <h2 className="section-title">How are you feeling?</h2>
+                  <SymptomCells
+                    symptoms={symptoms}
+                    selected={selectedSymptoms}
+                    onChange={setSelectedSymptoms}
+                  />
+                  <DailyNote value={dailyNote} onChange={setDailyNote} />
+                  <div className="actions today-actions">
+                    <button className="btn btn-primary" onClick={handleSaveToday}>
+                      Save today
+                    </button>
+                    <button
+                      className="btn btn-ghost"
+                      onClick={() => setSheetView("period")}
+                    >
+                      Log period
+                    </button>
+                  </div>
+                  <div className={`save-note${saveVisible ? " show" : ""}`}>
+                    Saved ✓
+                  </div>
+                </div>
               </div>
-            </div>
-          </>
-        )}
-        <h2 className="section-title">How are you feeling?</h2>
-        <SymptomCells
-          symptoms={symptoms}
-          selected={selectedSymptoms}
-          onChange={setSelectedSymptoms}
-        />
-        <div className="actions">
-          <button className="btn btn-primary" onClick={handleSaveToday}>
-            Save today
-          </button>
-          <button className="btn btn-ghost" onClick={() => setSheetOpen(true)}>
-            Log period
-          </button>
-        </div>
-        <div className={`save-note${saveVisible ? " show" : ""}`}>Saved ✓</div>
-        <h2 className="section-title">This cycle</h2>
-        <CycleHistory state={state} />
-        <div className="actions" style={{ marginTop: 20 }}>
-          <button className="btn btn-ghost" onClick={handleExport}>
-            Export backup
-          </button>
-          <button className="btn btn-ghost" onClick={handleImport}>
-            Import backup
-          </button>
-        </div>
-        <p className="small">
-          Aluna keeps your cycle data on this device. Sign in syncs your account
-          only — not your logs. Phase and hormone information is general
-          education, not medical advice. Export a backup regularly.
-        </p>
+            ) : (
+              <InsightsView state={state} />
+            )}
+            <p className="small">
+              Aluna keeps your cycle data on this device. Phase information is
+              general education, not medical advice.
+            </p>
+          </div>
+        </main>
       </div>
-      <SettingsSheet
-        open={sheetOpen}
+      <SettingsHub
+        view={sheetView}
         state={state}
-        onClose={() => setSheetOpen(false)}
+        onClose={() => setSheetView(null)}
         onSave={handleSettingsSave}
+        onExport={handleExport}
+        onImport={handleImport}
       />
     </>
   );

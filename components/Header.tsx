@@ -1,8 +1,10 @@
 "use client";
 
-import { signOut } from "next-auth/react";
+type Props = {
+  onSettings: () => void;
+};
 
-export function Header({ onSettings }: { onSettings: () => void }) {
+export function Header({ onSettings }: Props) {
   const dateStr = new Date().toLocaleDateString(undefined, {
     weekday: "short",
     day: "numeric",
@@ -11,22 +13,14 @@ export function Header({ onSettings }: { onSettings: () => void }) {
 
   return (
     <header className="app-header">
-      <div className="brand">
+      <div className="brand brand-mobile">
         <div className="logo">Aluna</div>
         <div className="tagline">your inner tide</div>
       </div>
-      <div style={{ display: "flex", alignItems: "center" }}>
+      <div className="header-actions">
         <div className="date">{dateStr}</div>
         <button className="gear" onClick={onSettings} aria-label="Settings">
           ☾
-        </button>
-        <button
-          className="gear"
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          aria-label="Sign out"
-          style={{ fontSize: 14 }}
-        >
-          ↪
         </button>
       </div>
     </header>

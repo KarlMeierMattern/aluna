@@ -15,9 +15,40 @@ function setupVapid() {
   return true;
 }
 
+function daysBetween(fromIso: string, toIso: string): number {
+  const from = new Date(fromIso + "T00:00:00").getTime();
+  const to = new Date(toIso + "T00:00:00").getTime();
+  return Math.floor((to - from) / 86400000);
+}
+
+async function sendToUser(
+  subs: (typeof pushSubscriptions.$inferSelect)[],
+  payload: { title: string; body: string }
+): Promise<number> {
+  let sent = 0;
+  const data = JSON.stringify(payload);
+
+  for (const sub of subs) {
+    try {
+      await webpush.sendNotification(
+        {
+          endpoint: sub.endpoint,
+          keys: { p256dh: sub.p256dh, auth: sub.auth },
+        },
+        data
+      );
+      sent++;
+    } catch {
+      // subscription expired or invalid
+    }
+  }
+
+  return sent;
+}
+
 export async function GET(req: Request) {
-  const secret = req.headers.get("authorization");
-  if (secret !== `Bearer ${process.env.CRON_SECRET}`) {
+  const authHeader = req.headers.get("authorization");
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -26,8 +57,11 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Not configured" }, { status: 503 });
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  const schedules = await db.select().from(reminderSchedules).limit(BATCH_SIZE);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const schedules = await db
+    .select()
+    .from(reminderSchedules)
+    .limit(BATCH_SIZE);
 
   let sent = 0;
 
@@ -45,13 +79,18 @@ export async function GET(req: Request) {
     let body: string | null = null;
 
     if (schedule.nextBleedDate && prefs.periodDaysBefore > 0) {
-      const bleed = new Date(schedule.nextBleedDate + "T00:00:00");
-      const diff = Math.floor(
-        (bleed.getTime() - new Date(today + "T00:00:00").getTime()) / 86400000,
-      );
+      const diff = daysBetween(todayIso, schedule.nextBleedDate);
       if (diff === prefs.periodDaysBefore) {
         body = `Your period may start in ${diff} day${diff === 1 ? "" : "s"}.`;
       }
+    }
+
+    if (
+      !body &&
+      prefs.fertileAlert &&
+      schedule.fertileWindowStart === todayIso
+    ) {
+      body = "Your estimated fertile window starts today.";
     }
 
     if (!body && prefs.dailyNudge) {
@@ -60,21 +99,8 @@ export async function GET(req: Request) {
 
     if (!body) continue;
 
-    for (const sub of subs) {
-      try {
-        await webpush.sendNotification(
-          {
-            endpoint: sub.endpoint,
-            keys: { p256dh: sub.p256dh, auth: sub.auth },
-          },
-          JSON.stringify({ title: "Aluna", body }),
-        );
-        sent++;
-      } catch {
-        // expired subscription — ignore for now
-      }
-    }
+    sent += await sendToUser(subs, { title: "Aluna", body });
   }
 
-  return NextResponse.json({ sent, processed: schedules.length });
+  return NextResponse.json({ sent, processed: schedules.length, date: todayIso });
 }

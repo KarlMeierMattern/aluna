@@ -17,7 +17,7 @@ export function HormoneCard({
     <>
       <h2 className="section-title">
         Your hormones now
-        <button className="toggle" onClick={onToggleDetail}>
+        <button type="button" className="toggle" onClick={onToggleDetail}>
           {detail ? "Brief" : "Detailed"}
         </button>
       </h2>
@@ -29,6 +29,19 @@ export function HormoneCard({
             <div className="ic-body">
               Once you log your last period, Aluna shows what estrogen and
               progesterone are doing right now.
+            </div>
+            <div className={`ic-detail${detail ? " show" : ""}`}>
+              <h4>What you&apos;ll see</h4>
+              <ul>
+                <li>Your current cycle phase and day count</li>
+                <li>Estrogen and progesterone level indicators</li>
+                <li>Phase-specific guidance for where you are</li>
+              </ul>
+              <h4>Get started</h4>
+              <ul>
+                <li>Open settings (☾) and log when your last period started</li>
+                <li>Adjust cycle length in settings if yours isn&apos;t ~28 days</li>
+              </ul>
             </div>
           </>
         ) : (

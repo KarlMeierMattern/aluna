@@ -5,7 +5,8 @@ import {
   reminderSchedules,
   shareSnapshots,
 } from "@/lib/db/schema";
-import { getCycleSnapshot, getFertileWindow, iso } from "@/lib/cycle/utils";
+import { getCycleSnapshot, getFertileWindow } from "@/lib/cycle/utils";
+import { computeReminderSchedule } from "@/lib/reminders/schedule";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
@@ -29,14 +30,7 @@ export async function POST(req: Request) {
   const bcSuppresses = snapshot.bcSuppresses;
 
   const ownerId = session.user.id;
-  const nextBleed =
-    state.periodStart && snapshot.daysToNext !== null
-      ? iso(
-          new Date(
-            Date.now() + snapshot.daysToNext * 86400000
-          )
-        )
-      : null;
+  const schedule = computeReminderSchedule(state);
 
   await db
     .insert(shareSnapshots)
@@ -68,21 +62,21 @@ export async function POST(req: Request) {
       },
     });
 
-  if (nextBleed) {
+  if (schedule.nextBleedDate) {
     await db
       .insert(reminderSchedules)
       .values({
         userId: ownerId,
-        nextBleedDate: nextBleed,
-        fertileWindowStart: bcSuppresses ? null : String(fertile.startDay),
-        fertileWindowEnd: bcSuppresses ? null : String(fertile.endDay),
+        nextBleedDate: schedule.nextBleedDate,
+        fertileWindowStart: schedule.fertileWindowStart,
+        fertileWindowEnd: schedule.fertileWindowEnd,
       })
       .onConflictDoUpdate({
         target: reminderSchedules.userId,
         set: {
-          nextBleedDate: nextBleed,
-          fertileWindowStart: bcSuppresses ? null : String(fertile.startDay),
-          fertileWindowEnd: bcSuppresses ? null : String(fertile.endDay),
+          nextBleedDate: schedule.nextBleedDate,
+          fertileWindowStart: schedule.fertileWindowStart,
+          fertileWindowEnd: schedule.fertileWindowEnd,
           updatedAt: new Date(),
         },
       });
@@ -118,6 +112,32 @@ export async function POST(req: Request) {
   return NextResponse.json({
     token,
     shareUrl: `${url.origin}/share/${token}`,
+  });
+}
+
+export async function GET() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const db = getDb();
+  if (!db) return NextResponse.json({ error: "Not configured" }, { status: 503 });
+
+  const [link] = await db
+    .select()
+    .from(partnerLinks)
+    .where(eq(partnerLinks.ownerId, session.user.id))
+    .limit(1);
+
+  if (!link?.active) {
+    return NextResponse.json({ active: false });
+  }
+
+  return NextResponse.json({
+    active: true,
+    token: link.token,
+    scopes: link.scopes,
   });
 }
 
