@@ -961,10 +961,22 @@ h2.section-title {
   max-width: none;
 }
 
-.insights-grid {
+.insights-charts {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 4px;
+}
+
+.insight-block {
+  margin-bottom: 8px;
+}
+
+.insight-block .section-title {
+  margin-top: 24px;
+}
+
+.insight-block:first-child .section-title {
+  margin-top: 0;
 }
 
 .nav-icon {
@@ -1609,26 +1621,25 @@ h2.section-title {
     max-width: 520px;
   }
 
-  .insights-grid {
+  .insights-charts {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0 28px;
+    gap: 20px 28px;
+    align-items: start;
   }
 
-  .insights-grid .section-title,
-  .insights-grid .info-card,
-  .insights-grid .chart-empty {
-    grid-column: span 1;
+  .insight-block-full {
+    max-width: 100%;
   }
 
-  .insights > .section-title:first-child,
-  .insights > .stat-row,
-  .insights > .section-title:nth-of-type(2),
-  .insights > .info-card:first-of-type,
-  .insights-past-title,
-  .insights .past-entries,
-  .insights > .small {
+  .insight-block .section-title {
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+
+  .insights-charts .insight-block:nth-child(3) {
     grid-column: 1 / -1;
+    max-width: 480px;
   }
 
   .stat-row {

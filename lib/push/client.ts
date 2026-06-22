@@ -71,12 +71,37 @@ export async function subscribeToPush(
     });
 
     if (!res.ok) {
-      return { ok: false, error: "Failed to save subscription on server." };
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (res.status === 503) {
+        return {
+          ok: false,
+          error: "Server not configured (database or env vars).",
+        };
+      }
+      return {
+        ok: false,
+        error: data.error ?? "Failed to save subscription on server.",
+      };
     }
 
     return { ok: true };
-  } catch {
-    return { ok: false, error: "Could not enable notifications." };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes("sw.js") || msg.includes("ServiceWorker")) {
+      return {
+        ok: false,
+        error:
+          "Service worker not available — push only works on the deployed app (not local dev).",
+      };
+    }
+    if (msg.includes("applicationServerKey") || msg.includes("Invalid")) {
+      return {
+        ok: false,
+        error:
+          "Invalid VAPID key — check NEXT_PUBLIC_VAPID_PUBLIC_KEY matches your public key.",
+      };
+    }
+    return { ok: false, error: `Could not enable notifications: ${msg}` };
   }
 }
 

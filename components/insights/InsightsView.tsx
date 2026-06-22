@@ -10,38 +10,54 @@ import { PhaseChart } from "./PhaseChart";
 import { StatCards } from "./StatCards";
 import { SymptomChart } from "./SymptomChart";
 
+function InsightBlock({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="insight-block">
+      <h2 className="section-title">{title}</h2>
+      <div className="info-card">{children}</div>
+    </section>
+  );
+}
+
 export function InsightsView({ state }: { state: AlunaState }) {
   const data = useMemo(() => buildInsights(state), [state]);
 
   return (
     <div className="insights">
-      <h2 className="section-title">Overview</h2>
-      <StatCards data={data} />
+      <section className="insight-block insight-block-full">
+        <h2 className="section-title">Overview</h2>
+        <StatCards data={data} />
+      </section>
 
-      <h2 className="section-title">Calendar</h2>
-      <div className="info-card">
-        <LogCalendar state={state} />
-      </div>
-
-      <div className="insights-grid">
-        <h2 className="section-title">Symptom patterns</h2>
+      <section className="insight-block insight-block-full">
+        <h2 className="section-title">Calendar</h2>
         <div className="info-card">
+          <LogCalendar state={state} />
+        </div>
+      </section>
+
+      <div className="insights-charts">
+        <InsightBlock title="Symptom patterns">
           <SymptomChart data={data.symptomCounts} />
-        </div>
-
-        <h2 className="section-title">By phase</h2>
-        <div className="info-card">
+        </InsightBlock>
+        <InsightBlock title="By phase">
           <PhaseChart data={data.phaseSymptomCounts} />
-        </div>
-
-        <h2 className="section-title">Cycle length</h2>
-        <div className="info-card">
+        </InsightBlock>
+        <InsightBlock title="Cycle length">
           <CycleLengthChart data={data.cycleLengths} />
-        </div>
+        </InsightBlock>
       </div>
 
-      <h2 className="section-title insights-past-title">Past entries</h2>
-      <PastEntriesList entries={data.entries} />
+      <section className="insight-block insight-block-full">
+        <h2 className="section-title">Past entries</h2>
+        <PastEntriesList entries={data.entries} />
+      </section>
     </div>
   );
 }
