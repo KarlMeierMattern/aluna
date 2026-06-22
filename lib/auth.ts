@@ -7,7 +7,9 @@ import { users, accounts } from "./db/schema";
 const db = getDb();
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: db ? DrizzleAdapter(db, { usersTable: users, accountsTable: accounts }) : undefined,
+  adapter: db
+    ? DrizzleAdapter(db, { usersTable: users, accountsTable: accounts })
+    : undefined,
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,

@@ -1,9 +1,6 @@
 import webpush from "web-push";
 import { getDb } from "@/lib/db";
-import {
-  pushSubscriptions,
-  reminderSchedules,
-} from "@/lib/db/schema";
+import { pushSubscriptions, reminderSchedules } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -29,10 +26,7 @@ export async function GET(req: Request) {
   }
 
   const today = new Date().toISOString().slice(0, 10);
-  const schedules = await db
-    .select()
-    .from(reminderSchedules)
-    .limit(BATCH_SIZE);
+  const schedules = await db.select().from(reminderSchedules).limit(BATCH_SIZE);
 
   let sent = 0;
 
@@ -52,7 +46,7 @@ export async function GET(req: Request) {
     if (schedule.nextBleedDate && prefs.periodDaysBefore > 0) {
       const bleed = new Date(schedule.nextBleedDate + "T00:00:00");
       const diff = Math.floor(
-        (bleed.getTime() - new Date(today + "T00:00:00").getTime()) / 86400000
+        (bleed.getTime() - new Date(today + "T00:00:00").getTime()) / 86400000,
       );
       if (diff === prefs.periodDaysBefore) {
         body = `Your period may start in ${diff} day${diff === 1 ? "" : "s"}.`;
@@ -72,7 +66,7 @@ export async function GET(req: Request) {
             endpoint: sub.endpoint,
             keys: { p256dh: sub.p256dh, auth: sub.auth },
           },
-          JSON.stringify({ title: "Aluna", body })
+          JSON.stringify({ title: "Aluna", body }),
         );
         sent++;
       } catch {
