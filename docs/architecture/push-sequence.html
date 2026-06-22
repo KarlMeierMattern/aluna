@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aluna — Push Notification Flow (Sequence)</title>
+<style>
+  :root {
+    --fg: #0f172a;
+    --muted: #64748b;
+    --border: #cbd5e1;
+    --bg: #ffffff;
+    --canvas: #f8fafc;
+    --client: #bac8ff;
+    --vercel: #dbe4ff;
+    --neon: #c0eb75;
+    --cloudrun: #b2f2bb;
+    --amber: #f08c00;
+    --blue: #1971c2;
+    --green: #2f9e44;
+    --orange: #e8590c;
+  }
+  html, body { margin: 0; background: var(--canvas); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  .canvas { background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+    padding: 8px; overflow: auto; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  svg { display: block; width: 100%; height: auto; }
+  .participant rect { stroke: var(--fg); stroke-width: 2; rx: 8; ry: 8; }
+  .participant .title { font-weight: 600; font-size: 13px; fill: var(--fg); }
+  .lifeline { stroke: var(--border); stroke-width: 1.5; stroke-dasharray: 6 5; }
+  .msg { stroke-width: 2; fill: none; }
+  .msg-label { font-size: 11px; font-weight: 500;
+    paint-order: stroke; stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+  .return { stroke-dasharray: 6 4; }
+  .blue-fill { fill: var(--blue); } .green-fill { fill: var(--green); }
+  .amber-fill { fill: var(--amber); } .orange-fill { fill: var(--orange); }
+  .blue { stroke: var(--blue); } .green { stroke: var(--green); }
+  .amber { stroke: var(--amber); } .orange { stroke: var(--orange); }
+  .legend { margin-top: 24px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .legend-card { background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
+  .legend-card h3 { font-size: 13px; margin: 0 0 4px;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Aluna — Web Push Reminder Flow</h1>
+  <p class="sub">Sequence diagram · subscribe once · Vercel cron sends · service worker displays</p>
+
+  <div class="canvas">
+    <svg viewBox="0 0 1100 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="a-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--blue)"/></marker>
+        <marker id="a-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--green)"/></marker>
+        <marker id="a-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--amber)"/></marker>
+        <marker id="a-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--orange)"/></marker>
+      </defs>
+
+      <g class="participant"><rect x="20" y="24" width="120" height="44" fill="var(--client)"/><text class="title" x="80" y="52" text-anchor="middle">User</text></g>
+      <g class="participant"><rect x="170" y="24" width="130" height="44" fill="var(--vercel)"/><text class="title" x="235" y="52" text-anchor="middle">Service Worker</text></g>
+      <g class="participant"><rect x="330" y="24" width="130" height="44" fill="var(--vercel)"/><text class="title" x="395" y="52" text-anchor="middle">API routes</text></g>
+      <g class="participant"><rect x="490" y="24" width="110" height="44" fill="var(--neon)"/><text class="title" x="545" y="52" text-anchor="middle">Neon</text></g>
+      <g class="participant"><rect x="630" y="24" width="120" height="44" fill="var(--amber)" fill-opacity="0.4"/><text class="title" x="690" y="52" text-anchor="middle">Vercel Cron</text></g>
+      <g class="participant"><rect x="780" y="24" width="140" height="44" fill="var(--cloudrun)"/><text class="title" x="850" y="48" text-anchor="middle">Push Service</text><text class="title" x="850" y="62" text-anchor="middle" font-size="10" font-weight="400" fill="var(--muted)">FCM / APNs</text></g>
+
+      <line class="lifeline" x1="80" y1="68" x2="80" y2="660"/>
+      <line class="lifeline" x1="235" y1="68" x2="235" y2="660"/>
+      <line class="lifeline" x1="395" y1="68" x2="395" y2="660"/>
+      <line class="lifeline" x1="545" y1="68" x2="545" y2="660"/>
+      <line class="lifeline" x1="690" y1="68" x2="690" y2="660"/>
+      <line class="lifeline" x1="850" y1="68" x2="850" y2="660"/>
+
+      <!-- Subscribe phase -->
+      <text x="20" y="100" font-size="11" font-weight="600" fill="var(--muted)">SUBSCRIBE (once)</text>
+
+      <line class="msg blue" x1="80" y1="125" x2="235" y2="125" marker-end="url(#a-blue)"/>
+      <text class="msg-label blue-fill" x="95" y="118">1. grant notification permission</text>
+
+      <line class="msg blue return" x1="235" y1="160" x2="80" y2="160" marker-end="url(#a-blue)"/>
+      <text class="msg-label blue-fill" x="95" y="153">PushSubscription (endpoint + keys)</text>
+
+      <line class="msg blue" x1="80" y1="195" x2="395" y2="195" marker-end="url(#a-blue)"/>
+      <text class="msg-label blue-fill" x="170" y="188">2. POST /api/push/subscribe</text>
+
+      <line class="msg blue" x1="395" y1="230" x2="545" y2="230" marker-end="url(#a-blue)"/>
+      <text class="msg-label blue-fill" x="420" y="223">3. store push_subscriptions row</text>
+
+      <line class="msg orange" x1="80" y1="265" x2="395" y2="265" marker-end="url(#a-orange)"/>
+      <text class="msg-label orange-fill" x="130" y="258">sync reminder_prefs + next bleed date</text>
+
+      <!-- Cron phase -->
+      <text x="20" y="310" font-size="11" font-weight="600" fill="var(--muted)">REMIND (scheduled)</text>
+
+      <line class="msg amber" x1="690" y1="335" x2="395" y2="335" marker-end="url(#a-amber)"/>
+      <text class="msg-label amber-fill" x="480" y="328">4. GET /api/cron/reminders · CRON_SECRET</text>
+
+      <line class="msg amber" x1="395" y1="370" x2="545" y2="370" marker-end="url(#a-amber)"/>
+      <text class="msg-label amber-fill" x="420" y="363">5. query due reminders (batched ≤200)</text>
+
+      <line class="msg green" x1="395" y1="405" x2="850" y2="405" marker-end="url(#a-green)"/>
+      <text class="msg-label green-fill" x="560" y="398">6. web-push HTTP · VAPID signed payload</text>
+
+      <line class="msg green" x1="850" y1="440" x2="235" y2="440" marker-end="url(#a-green)"/>
+      <text class="msg-label green-fill" x="480" y="433">7. push event delivered to device</text>
+
+      <line class="msg green return" x1="235" y1="475" x2="80" y2="475" marker-end="url(#a-green)"/>
+      <text class="msg-label green-fill" x="95" y="468">8. showNotification()</text>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-card">
+      <h3>Why Neon needs reminder data</h3>
+      IndexedDB is invisible to the server. To fire a push while the app is closed, the user must upload minimal schedule data (next period date, reminder preferences) when enabling push or saving settings.
+    </div>
+    <div class="legend-card">
+      <h3>Cron safety</h3>
+      Each cron invocation processes at most ~200 subscriptions — well within Vercel's function timeout. Pagination continues on the next hourly run if needed.
+    </div>
+    <div class="legend-card">
+      <h3>iOS caveat</h3>
+      Web push on iOS requires the PWA to be added to the Home Screen (iOS 16.4+). Document this in onboarding.
+    </div>
+  </div>
+</div>
+</body>
+</html>

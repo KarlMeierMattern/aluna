@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)file:///C:/Users/tanic/Downloads/aluna_3.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#2a1830">
+<title>Aluna</title>
+<style>
+  :root{
+    --plum:#3b1f3d; --wine:#6e1f3a; --berry:#9c3a5a;
+    --rust:#b5532a; --amber:#e08a2b; --gold:#f0b54a;
+    --sage:#9aab7e; --sage-deep:#6f7d56;
+    /* airy "underwater" tones from the reference image */
+    --sky:#a8cfe0; --mint:#bfe0cf; --blush:#f0c9c4; --pearl:#e4eef0; --aqua:#8fc4cf;
+    --cream:#f4ecdd; --cream-dim:#d8cdb8;
+    --ink:#2a1830; --ink-soft:#4a3550;
+    --glass:rgba(255,255,255,0.10);
+    --glass-line:rgba(255,255,255,0.18);
+    --shadow:rgba(20,8,24,0.35);
+    --font-d:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --font-b:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:var(--font-b);color:var(--cream);overflow-x:hidden;position:relative;
+    min-height:100vh;min-height:100dvh}
+  #bg{position:fixed;inset:0;z-index:-2;transition:background 2.5s ease}
+  #bg::before,#bg::after{content:"";position:absolute;inset:-40%;
+    background:radial-gradient(circle at 30% 30%,var(--b1) 0%,transparent 55%),
+               radial-gradient(circle at 70% 65%,var(--b2) 0%,transparent 55%),
+               radial-gradient(circle at 50% 90%,var(--b3) 0%,transparent 60%);
+    mix-blend-mode:screen;opacity:.85;
+    animation:drift var(--drift,26s) ease-in-out infinite alternate}
+  #bg::after{animation-duration:calc(var(--drift,26s) * 1.4);animation-direction:alternate-reverse;opacity:.6}
+  @keyframes drift{0%{transform:translate(-4%,-2%) scale(1) rotate(0deg)}
+    50%{transform:translate(3%,4%) scale(1.12) rotate(8deg)}
+    100%{transform:translate(-2%,3%) scale(1.05) rotate(-5deg)}}
+  #ripple{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+    background:repeating-linear-gradient(115deg,transparent 0 22px,rgba(255,255,255,.025) 22px 24px);
+    animation:rippleMove var(--drift,26s) linear infinite}
+  @keyframes rippleMove{to{background-position:240px 0}}
+
+  /* floating light particles — suspended in water */
+  #particles{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .pt{position:absolute;bottom:-12px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.9),rgba(255,255,255,.15) 60%,transparent 72%);
+    animation:rise var(--rt) linear infinite;animation-delay:var(--rd);opacity:0}
+  @keyframes rise{
+    0%{transform:translateY(0) translateX(0) scale(.6);opacity:0}
+    12%{opacity:var(--po,.7)}
+    50%{transform:translateY(-46vh) translateX(var(--drx,14px)) scale(1)}
+    88%{opacity:var(--po,.7)}
+    100%{transform:translateY(-96vh) translateX(calc(var(--drx,14px) * -1)) scale(.7);opacity:0}}
+
+  /* glassy refraction shimmer that drifts across the hero */
+  .glass-shimmer{position:absolute;inset:0;pointer-events:none;border-radius:inherit;mix-blend-mode:soft-light;
+    background:linear-gradient(105deg,transparent 20%,rgba(255,255,255,.55) 38%,rgba(190,224,207,.35) 46%,transparent 64%);
+    background-size:280% 100%;animation:shimmer 9s ease-in-out infinite}
+  @keyframes shimmer{0%{background-position:130% 0}100%{background-position:-60% 0}}
+
+  .wrap{max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 22px) 22px 120px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .brand{display:flex;flex-direction:column}
+  .logo{font-family:var(--font-d);font-size:32px;font-style:italic;letter-spacing:1px;font-weight:600}
+  .tagline{font-size:11px;letter-spacing:3px;text-transform:uppercase;opacity:.6;margin-top:-2px}
+  .date{font-size:13px;opacity:.7;text-align:right}
+  .gear{background:var(--glass);border:1px solid var(--glass-line);color:var(--cream);
+    width:42px;height:42px;border-radius:14px;font-size:18px;cursor:pointer;margin-left:12px}
+
+  .hero{margin-top:18px;border-radius:30px;padding:30px 26px 28px;background:var(--glass);
+    backdrop-filter:blur(18px) saturate(120%);-webkit-backdrop-filter:blur(18px) saturate(120%);
+    border:1px solid var(--glass-line);box-shadow:0 18px 50px var(--shadow);position:relative;overflow:hidden}
+  .hero.dimmed .phase-name,.hero.dimmed .countdown{opacity:.45}
+  .phase-eyebrow{font-size:12px;letter-spacing:3px;text-transform:uppercase;opacity:.75}
+  .phase-name{font-family:var(--font-d);font-size:38px;font-style:italic;margin:6px 0 2px;line-height:1}
+  .phase-desc{font-size:14px;line-height:1.5;opacity:.85;max-width:34ch;margin-top:10px}
+  .countdown{display:flex;align-items:baseline;gap:8px;margin-top:22px}
+  .cd-num{font-family:var(--font-d);font-size:52px;line-height:.9}
+  .cd-label{font-size:13px;opacity:.8;max-width:14ch}
+  .day-dot{position:absolute;top:26px;right:26px;text-align:center}
+  .day-dot .n{font-family:var(--font-d);font-size:26px}
+  .day-dot .l{font-size:10px;letter-spacing:2px;text-transform:uppercase;opacity:.7}
+  .bc-caveat{margin-top:16px;font-size:12px;line-height:1.45;opacity:.85;
+    background:rgba(255,255,255,.07);border:1px solid var(--glass-line);
+    border-radius:14px;padding:11px 13px;display:none}
+  .bc-caveat.show{display:block}
+
+  .ring-card{margin-top:18px;display:flex;justify-content:center;padding:6px}
+  svg.ring{width:100%;max-width:300px;height:auto;overflow:visible}
+
+  h2{font-family:var(--font-d);font-style:italic;font-size:21px;font-weight:600;margin:30px 4px 14px;opacity:.95;
+    display:flex;align-items:center;justify-content:space-between}
+  .toggle{font-family:var(--font-b);font-style:normal;font-size:12px;letter-spacing:.5px;
+    background:var(--glass);border:1px solid var(--glass-line);color:var(--cream);
+    padding:7px 13px;border-radius:20px;cursor:pointer}
+
+  /* Hormone info card */
+  .info-card{border-radius:24px;padding:22px 22px 20px;background:var(--glass);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--glass-line);
+    box-shadow:0 12px 36px var(--shadow)}
+  .info-card .ic-phase{font-family:var(--font-d);font-style:italic;font-size:20px;margin-bottom:4px}
+  .info-card .ic-days{font-size:12px;letter-spacing:1px;text-transform:uppercase;opacity:.6;margin-bottom:14px}
+  .hormone-row{display:flex;gap:10px;margin-bottom:14px}
+  .hbar{flex:1;text-align:center}
+  .hbar .hname{font-size:11px;opacity:.7;margin-bottom:5px}
+  .hbar .htrack{height:7px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden}
+  .hbar .hfill{height:100%;border-radius:4px;transition:width .8s ease}
+  .ic-body{font-size:13.5px;line-height:1.6;opacity:.9}
+  .ic-body strong{color:var(--gold);font-weight:600}
+  .ic-detail{margin-top:14px;font-size:13px;line-height:1.6;opacity:.88;display:none}
+  .ic-detail.show{display:block}
+  .ic-detail h4{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;opacity:.65;margin:14px 0 5px}
+  .ic-detail ul{list-style:none;padding:0}
+  .ic-detail li{padding-left:16px;position:relative;margin-bottom:5px}
+  .ic-detail li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;
+    background:var(--amber)}
+
+  .cells{display:flex;flex-wrap:wrap;gap:11px;justify-content:center}
+  .cell{position:relative;border:none;cursor:pointer;color:var(--cream);background:var(--glass);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-line);
+    font-family:var(--font-b);font-size:13px;letter-spacing:.2px;display:flex;align-items:center;
+    justify-content:center;text-align:center;
+    transition:transform .45s cubic-bezier(.34,1.4,.5,1),box-shadow .5s ease,background .5s ease;
+    width:92px;height:92px;border-radius:46% 54% 52% 48%/52% 46% 54% 48%;animation:bob var(--bd,7s) ease-in-out infinite}
+  .cell:nth-child(3n){border-radius:54% 46% 48% 52%/46% 54% 50% 50%;--bd:8.5s}
+  .cell:nth-child(3n+1){--bd:6.2s}
+  .cell:nth-child(4n){width:104px;height:104px;border-radius:50% 50% 46% 54%/54% 48% 52% 46%}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .cell.on{background:radial-gradient(circle at 35% 30%,var(--gold),var(--rust) 70%,var(--wine));
+    box-shadow:0 0 24px 2px rgba(224,138,43,.5),inset 0 2px 10px rgba(255,255,255,.3);
+    transform:scale(1.07);border-color:rgba(255,220,150,.5)}
+  .cell.pulse{animation:pop .5s ease}
+  @keyframes pop{0%{transform:scale(1.07)}40%{transform:scale(.93)}100%{transform:scale(1.07)}}
+
+  .actions{display:flex;gap:12px;margin-top:26px}
+  .btn{flex:1;border:none;cursor:pointer;font-family:var(--font-b);font-size:15px;font-weight:600;
+    color:var(--cream);padding:16px;border-radius:20px;letter-spacing:.3px;border:1px solid var(--glass-line);
+    transition:transform .2s ease;box-shadow:0 8px 24px var(--shadow)}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:linear-gradient(135deg,var(--rust),var(--wine))}
+  .btn-ghost{background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .save-note{text-align:center;font-size:12.5px;opacity:0;margin-top:14px;transition:opacity .4s ease;height:16px}
+  .save-note.show{opacity:.85}
+
+  .history{margin-top:14px;display:flex;gap:6px;flex-wrap:wrap;padding:4px}
+  .hist-day{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    font-size:11px;border:1px solid var(--glass-line);background:var(--glass);opacity:.85}
+  .hist-day.logged{background:linear-gradient(135deg,var(--berry),var(--wine));border-color:transparent}
+  .hist-day.period{background:linear-gradient(135deg,var(--wine),var(--plum));box-shadow:inset 0 0 8px rgba(0,0,0,.3)}
+
+  .scrim{position:fixed;inset:0;background:rgba(20,8,24,.6);backdrop-filter:blur(4px);
+    display:none;align-items:flex-end;z-index:50}
+  .scrim.open{display:flex}
+  .sheet{background:linear-gradient(180deg,rgba(60,35,62,.97),rgba(42,24,48,.99));width:100%;max-width:520px;
+    margin:0 auto;border-radius:28px 28px 0 0;padding:26px 24px calc(env(safe-area-inset-bottom) + 26px);
+    border-top:1px solid var(--glass-line);box-shadow:0 -20px 60px rgba(0,0,0,.5);max-height:88vh;overflow-y:auto}
+  .sheet h3{font-family:var(--font-d);font-style:italic;font-size:23px;margin-bottom:6px}
+  .sheet p{font-size:13.5px;opacity:.8;line-height:1.5;margin-bottom:14px}
+  .sheet label{display:block;font-size:13px;opacity:.8;margin:14px 0 6px}
+  .sheet input{width:100%;padding:14px;border-radius:14px;border:1px solid var(--glass-line);
+    background:rgba(255,255,255,.08);color:var(--cream);font-size:16px;font-family:var(--font-b)}
+  .sheet input::-webkit-calendar-picker-indicator{filter:invert(.8)}
+  .seg{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:60px;padding:13px;border-radius:14px;border:1px solid var(--glass-line);
+    background:rgba(255,255,255,.06);color:var(--cream);font-size:13px;cursor:pointer;font-family:var(--font-b)}
+  .seg button.sel{background:linear-gradient(135deg,var(--rust),var(--wine));border-color:transparent}
+  .bc-list{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+  .bc-opt{text-align:left;padding:14px;border-radius:14px;border:1px solid var(--glass-line);
+    background:rgba(255,255,255,.06);color:var(--cream);cursor:pointer;font-family:var(--font-b)}
+  .bc-opt.sel{background:linear-gradient(135deg,var(--rust),var(--wine));border-color:transparent}
+  .bc-opt .t{font-size:14.5px;font-weight:600}
+  .bc-opt .d{font-size:12px;opacity:.75;margin-top:2px;line-height:1.4}
+
+  .small{font-size:11.5px;opacity:.6;text-align:center;margin-top:30px;line-height:1.6;padding:0 10px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:opacity .2s ease!important}
+    #particles{display:none}}
+</style>
+</head>
+<body>
+<div id="bg" style="--b1: var(--plum); --b2: var(--wine); --b3: var(--berry); --drift: 34s;"></div>
+<div id="ripple" style="--drift: 34s;"></div>
+<div id="particles"><div class="pt" style="width: 8.22066px; height: 8.22066px; left: 15.8375vw; --rt: 26.968798476874575s; --rd: -10.273764472056087s; --drx: 2.125473115836595px; --po: 0.6795117699689802;"></div><div class="pt" style="width: 8.47649px; height: 8.47649px; left: 4.07413vw; --rt: 18.40792390205208s; --rd: -15.936337138134663s; --drx: 0.3507229242491938px; --po: 0.5799650744851708;"></div><div class="pt" style="width: 3.65568px; height: 3.65568px; left: 84.2465vw; --rt: 12.00554207735942s; --rd: -3.8975761322307214s; --drx: -1.295660443069245px; --po: 0.5705871330069204;"></div><div class="pt" style="width: 6.61225px; height: 6.61225px; left: 42.8565vw; --rt: 11.590854198060228s; --rd: -11.467533677395874s; --drx: -12.91829969144397px; --po: 0.6315894902501635;"></div><div class="pt" style="width: 8.69797px; height: 8.69797px; left: 39.3721vw; --rt: 11.48750239585926s; --rd: -16.460297839610472s; --drx: 4.9962582867284056px; --po: 0.5666666093360351;"></div><div class="pt" style="width: 4.30792px; height: 4.30792px; left: 24.8467vw; --rt: 17.549574879305503s; --rd: -2.1284619432082996s; --drx: 16.246999213535524px; --po: 0.6486358192954507;"></div><div class="pt" style="width: 3.58266px; height: 3.58266px; left: 8.08155vw; --rt: 11.74527751578207s; --rd: -17.59053361087101s; --drx: 17.983422076173035px; --po: 0.5790316374007229;"></div><div class="pt" style="width: 7.37047px; height: 7.37047px; left: 7.41598vw; --rt: 15.871898640858237s; --rd: -11.832490927802791s; --drx: -16.13906976986485px; --po: 0.5589502299139592;"></div><div class="pt" style="width: 7.07461px; height: 7.07461px; left: 12.3673vw; --rt: 16.611150357568235s; --rd: -10.81427916731519s; --drx: 8.155171709132077px; --po: 0.6728449353413454;"></div><div class="pt" style="width: 8.6806px; height: 8.6806px; left: 82.543vw; --rt: 14.499959655042334s; --rd: -0.6275034340898527s; --drx: 19.14980749822311px; --po: 0.637997938265525;"></div><div class="pt" style="width: 7.00453px; height: 7.00453px; left: 55.8753vw; --rt: 24.324119559753754s; --rd: -17.062641613851827s; --drx: 18.453924211406616px; --po: 0.6890267969240156;"></div><div class="pt" style="width: 7.0934px; height: 7.0934px; left: 57.9838vw; --rt: 23.714910401789005s; --rd: -10.72979661015844s; --drx: -9.212744387367513px; --po: 0.6585119852438133;"></div><div class="pt" style="width: 8.66327px; height: 8.66327px; left: 66.3975vw; --rt: 13.86157509316694s; --rd: -0.5979899530725967s; --drx: -11.11397441720326px; --po: 0.6796128458973628;"></div><div class="pt" style="width: 5.34694px; height: 5.34694px; left: 91.0023vw; --rt: 21.81258633313618s; --rd: -14.363815268263057s; --drx: -8.922672427328058px; --po: 0.5660533674776272;"></div></div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">Aluna</div>
+      <div class="tagline">your inner tide</div>
+    </div>
+    <div style="display:flex;align-items:center">
+      <div class="date" id="today">Sat, Jun 20</div>
+      <button class="gear" id="settingsBtn" aria-label="Settings">☾</button>
+    </div>
+  </header>
+
+  <section class="hero dimmed" id="hero">
+    <div class="glass-shimmer"></div>
+    <div class="day-dot"><div class="n" id="cycleDay">4</div><div class="l">day</div></div>
+    <div class="phase-eyebrow" id="phaseEyebrow">menstrual phase</div>
+    <div class="phase-name" id="phaseName">Resting</div>
+    <div class="phase-desc" id="phaseDesc">Your body is shedding and renewing. Permission to slow down, wrap up warm, and ask less of yourself.</div>
+    <div class="countdown" id="countdown" style="display: flex;">
+      <div class="cd-num" id="cdNum">25</div>
+      <div class="cd-label" id="cdLabel">days until next bleed (est.)</div>
+    </div>
+    <div class="bc-caveat show" id="bcCaveat">☾ On the combined pill, patch or ring, your natural hormone cycle is paused. The phases below describe a natural cycle for learning — they likely don't reflect what your body is doing right now. Any bleeding is usually a withdrawal bleed during your break week.</div>
+  </section>
+
+  <div class="ring-card">
+    <svg class="ring" id="ring" viewBox="0 0 220 220" aria-hidden="true"><path d="M110 24 A86 86 0 0 1 187.48332263960805 72.68599843589" fill="none" stroke="var(--wine)" stroke-width="14" stroke-linecap="round" opacity="0.9"></path><path d="M187.48332263960805 72.68599843589 A86 86 0 0 1 147.31400156411001 187.48332263960805" fill="none" stroke="var(--sage)" stroke-width="14" stroke-linecap="round" opacity="0.9"></path><path d="M147.31400156411001 187.48332263960805 A86 86 0 0 1 72.68599843589001 187.48332263960805" fill="none" stroke="var(--gold)" stroke-width="14" stroke-linecap="round" opacity="0.9"></path><path d="M72.68599843589001 187.48332263960805 A86 86 0 0 1 109.99999999999999 24" fill="none" stroke="var(--rust)" stroke-width="14" stroke-linecap="round" opacity="0.9"></path><circle cx="163.62012295985107" cy="42.76249250774944" r="11" fill="var(--cream)"></circle><text x="110" y="106" text-anchor="middle" font-family="var(--font-d)" font-style="italic" font-size="30" fill="var(--cream)">4</text><text x="110" y="128" text-anchor="middle" font-size="11" letter-spacing="2" fill="var(--cream)" opacity=".7">DAY</text></svg>
+  </div>
+
+  <h2>Your hormones now <button class="toggle" id="infoToggle">Brief</button></h2>
+  <div class="info-card" id="infoCard">
+    <div class="ic-phase" id="icPhase">Resting — menstrual phase</div>
+    <div class="ic-days" id="icDays">Day 4 of ~28</div>
+    <div class="hormone-row" id="hormoneRow"><div class="hbar"><div class="hname">Estrogen</div><div class="htrack"><div class="hfill" style="width:18%;background:linear-gradient(90deg,var(--gold),var(--amber))"></div></div></div>
+     <div class="hbar"><div class="hname">Progesterone</div><div class="htrack"><div class="hfill" style="width:12%;background:linear-gradient(90deg,var(--berry),var(--wine))"></div></div></div></div>
+    <div class="ic-body" id="icBody"><strong>Estrogen</strong> and <strong>progesterone</strong> are both at their lowest. This dip is what triggers your bleed — and why energy often feels low.</div>
+    <div class="ic-detail show" id="icDetail"><h4>What you might notice</h4><ul><li>Lower energy and a pull toward rest</li><li>Possible cramps as the uterus sheds its lining</li><li>Mood can dip with the low hormones</li></ul>
+    <h4>Gentle support</h4><ul><li>Gentle movement — walking, stretching, yoga</li><li>Iron-rich foods to replace what's lost</li><li>Earlier nights; your body wants the rest</li></ul></div>
+  </div>
+
+  <h2>How are you feeling?</h2>
+  <div class="cells" id="cells"><button class="cell">Cramps</button><button class="cell">Tender</button><button class="cell">Tired</button><button class="cell">Energised</button><button class="cell">Moody</button><button class="cell">Calm</button><button class="cell">Headache</button><button class="cell">Bloated</button><button class="cell">Craving</button><button class="cell">Focused</button><button class="cell">Restless</button><button class="cell">Glowy</button></div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="saveBtn">Save today</button>
+    <button class="btn btn-ghost" id="periodBtn">Log period</button>
+  </div>
+  <div class="save-note" id="saveNote">Saved ✓</div>
+
+  <h2>This cycle</h2>
+  <div class="history" id="history"><div class="hist-day">17</div><div class="hist-day period">18</div><div class="hist-day">19</div><div class="hist-day">20</div></div>
+
+  <p class="small">Aluna keeps everything on your device only — no account, no server. Phase and hormone information is general education, not medical advice, and predictions are estimates from your own history. Your healthcare provider is the source of truth for your body and your birth control.</p>
+</div>
+
+<!-- Period + BC modal -->
+<div class="scrim" id="scrim">
+  <div class="sheet">
+    <h3>Your cycle &amp; birth control</h3>
+    <p>This sets the rhythm for your estimates — and your birth control changes how that rhythm works, so Aluna adjusts what it shows you.</p>
+    <label for="dateIn">Last period start date</label>
+    <input type="date" id="dateIn">
+    <label>Typical cycle length (days)</label>
+    <div class="seg" id="lenSeg">
+      <button data-len="24">24</button>
+      <button data-len="26">26</button>
+      <button data-len="28" class="sel">28</button>
+      <button data-len="30">30</button>
+      <button data-len="32">32</button>
+    </div>
+    <label>Birth control</label>
+    <div class="bc-list" id="bcList"></div>
+    <div class="actions" style="margin-top:22px">
+      <button class="btn btn-primary" id="sheetSave">Save</button>
+      <button class="btn btn-ghost" id="sheetCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- Data ---------------- */
+const DB_NAME="aluna-db", STORE="state";
+let db, state={ periodStart:null, cycleLen:28, bc:"none", logs:{}, detail:false };
+
+function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,1);
+  r.onupgradeneeded=e=>e.target.result.createObjectStore(STORE);
+  r.onsuccess=e=>{db=e.target.result;res()};r.onerror=()=>rej(r.error);});}
+function load(){return new Promise(res=>{const tx=db.transaction(STORE,"readonly").objectStore(STORE).get("main");
+  tx.onsuccess=()=>{if(tx.result)state={...state,...tx.result};res()};tx.onerror=()=>res();});}
+function save(){try{db.transaction(STORE,"readwrite").objectStore(STORE).put(state,"main")}catch(e){console.warn(e)}}
+
+const DAY=86400000;
+const iso=d=>d.toISOString().slice(0,10);
+const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d;};
+function daysSince(s){if(!s)return null;return Math.floor((today()-new Date(s+"T00:00:00"))/DAY);}
+
+/* ---------------- Birth control model ---------------- */
+// suppresses: does the method generally override the natural cycle?
+const BC_TYPES={
+  none:{t:"None / not tracking a method",d:"Natural cycle — full phase tracking.",suppresses:false},
+  copper:{t:"Copper IUD (non-hormonal)",d:"No hormones; your natural cycle continues.",suppresses:false},
+  fertility:{t:"Fertility awareness / barrier",d:"Condoms, diaphragm, tracking — cycle is natural.",suppresses:false},
+  combined:{t:"Combined pill / patch / ring",d:"Suppresses ovulation. Bleeds are withdrawal bleeds, not true periods.",suppresses:true,
+    note:"On the combined pill, patch or ring, your natural hormone cycle is paused. The phases below describe a natural cycle for learning — they likely don't reflect what your body is doing right now. Any bleeding is usually a withdrawal bleed during your break week."},
+  mini:{t:"Progestogen-only pill (mini-pill)",d:"Often changes or stops ovulation; bleeding varies.",suppresses:true,
+    note:"The mini-pill can stop or shift ovulation, and bleeding patterns vary a lot. Phase estimates may not match your body — treat them as general education."},
+  hormonal_iud:{t:"Hormonal IUD (Mirena, etc.)",d:"Often lightens or stops periods; ovulation varies.",suppresses:true,
+    note:"A hormonal IUD often reduces or stops bleeding and may suppress ovulation for some people. Your cycle may not follow the phases below."},
+  implant:{t:"Implant (Nexplanon)",d:"Usually stops ovulation; bleeding unpredictable.",suppresses:true,
+    note:"The implant usually prevents ovulation and bleeding can be irregular or absent. Phase predictions are unlikely to reflect your real cycle."},
+  injection:{t:"Injection (Depo-Provera)",d:"Stops ovulation; periods often stop over time.",suppresses:true,
+    note:"The injection suppresses ovulation and periods often become light or stop. The phases below are for general learning, not your current state."},
+};
+
+/* ---------------- Phase + hormone content ---------------- */
+const PHASES={
+  menstrual:{name:"Resting",eyebrow:"menstrual phase",
+    desc:"Your body is shedding and renewing. Permission to slow down, wrap up warm, and ask less of yourself.",
+    b1:"var(--plum)",b2:"var(--wine)",b3:"var(--berry)",drift:"34s",
+    e:18,p:12,
+    brief:"<strong>Estrogen</strong> and <strong>progesterone</strong> are both at their lowest. This dip is what triggers your bleed — and why energy often feels low.",
+    expect:["Lower energy and a pull toward rest","Possible cramps as the uterus sheds its lining","Mood can dip with the low hormones"],
+    tips:["Gentle movement — walking, stretching, yoga","Iron-rich foods to replace what's lost","Earlier nights; your body wants the rest"]},
+  follicular:{name:"Rising",eyebrow:"follicular phase",
+    desc:"Energy is building back up. A good window for starting things, planning, and reaching outward.",
+    b1:"var(--mint)",b2:"var(--sky)",b3:"var(--gold)",drift:"24s",
+    e:55,p:12,
+    brief:"<strong>Estrogen</strong> is climbing as a new egg matures. Rising estrogen lifts mood, energy and mental sharpness.",
+    expect:["Energy and motivation returning","Clearer thinking and better mood","Skin often looks its best"],
+    tips:["Start new projects — momentum is on your side","Schedule harder workouts; strength builds well now","Lean into social plans and creative work"]},
+  ovulatory:{name:"Peak",eyebrow:"ovulatory phase",
+    desc:"Your brightest, most outward-facing days. Energy, clarity and warmth at their fullest — make the most of it.",
+    b1:"var(--gold)",b2:"var(--blush)",b3:"var(--sky)",drift:"16s",
+    e:90,p:20,
+    brief:"<strong>Estrogen</strong> peaks and a surge of <strong>LH</strong> releases the egg. This is your most fertile, highest-energy window.",
+    expect:["Peak energy, confidence and libido","Most fertile days of your cycle","Feeling social and at your most outward"],
+    tips:["Schedule big conversations and presentations now","Note this window if fertility matters to you","Channel the energy — it's the high point"]},
+  luteal:{name:"Winding down",eyebrow:"luteal phase",
+    desc:"Settling inward again. Comfort, rest and gentleness serve you now as you move toward your next cycle.",
+    b1:"var(--rust)",b2:"var(--berry)",b3:"var(--plum)",drift:"30s",
+    e:45,p:75,
+    brief:"<strong>Progesterone</strong> rises to its peak, then both hormones fall if there's no pregnancy. That fall brings PMS for many.",
+    expect:["Energy gradually tapering off","PMS possible later: mood shifts, cravings, tender breasts","A natural pull inward and toward comfort"],
+    tips:["Wind down intensity; favour steady over strenuous","Magnesium and complex carbs can ease PMS","Protect your calm — say no to what drains you"]},
+};
+
+function phaseKeyFor(dayInCycle,len){
+  const d=((dayInCycle%len)+len)%len+1;
+  const ovu=len-14;
+  if(d<=5)return"menstrual";
+  if(d<=ovu-2)return"follicular";
+  if(d<=ovu+2)return"ovulatory";
+  return"luteal";
+}
+
+/* ---------------- Render ---------------- */
+function setBackground(p){const bg=document.getElementById('bg');
+  bg.style.setProperty('--b1',p.b1);bg.style.setProperty('--b2',p.b2);bg.style.setProperty('--b3',p.b3);
+  bg.style.setProperty('--drift',p.drift);document.getElementById('ripple').style.setProperty('--drift',p.drift);}
+
+/* floating light particles — denser & brighter in high-energy phases */
+function spawnParticles(mood){
+  const box=document.getElementById('particles');
+  if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){box.innerHTML="";return;}
+  const counts={rest:14,rising:22,peak:30,wind:18};
+  const n=counts[mood]||18;
+  box.innerHTML="";
+  for(let i=0;i<n;i++){
+    const p=document.createElement('div');p.className="pt";
+    const size=2+Math.random()*7;
+    p.style.width=size+"px";p.style.height=size+"px";
+    p.style.left=Math.random()*100+"vw";
+    p.style.setProperty('--rt',(11+Math.random()*16)+"s");
+    p.style.setProperty('--rd',(-Math.random()*18)+"s");
+    p.style.setProperty('--drx',(Math.random()*40-20)+"px");
+    p.style.setProperty('--po',(mood==='peak'?.85:.55)+Math.random()*.15);
+    box.appendChild(p);
+  }
+}
+
+function renderHero(){
+  const ds=daysSince(state.periodStart);
+  const hero=document.getElementById('hero');
+  const cd=document.getElementById('countdown');
+  const caveat=document.getElementById('bcCaveat');
+  const bc=BC_TYPES[state.bc]||BC_TYPES.none;
+  if(ds===null){
+    setBackground({b1:"var(--plum)",b2:"var(--berry)",b3:"var(--sky)",drift:"28s"});
+    spawnParticles('rising');
+    caveat.classList.remove('show');hero.classList.remove('dimmed');return;
+  }
+  const len=state.cycleLen;
+  const dayInCycle=((ds%len)+len)%len;
+  const key=phaseKeyFor(dayInCycle,len);
+  const p=PHASES[key];
+  setBackground(p);
+  const moodMap={menstrual:'rest',follicular:'rising',ovulatory:'peak',luteal:'wind'};
+  spawnParticles(moodMap[key]);
+  document.getElementById('phaseEyebrow').textContent=p.eyebrow;
+  document.getElementById('phaseName').textContent=p.name;
+  document.getElementById('phaseDesc').textContent=p.desc;
+  document.getElementById('cycleDay').textContent=dayInCycle+1;
+  const daysToNext=(len-dayInCycle)%len||len;
+  cd.style.display='flex';
+  document.getElementById('cdNum').textContent=daysToNext;
+  document.getElementById('cdLabel').textContent=(daysToNext===1?'day':'days')+' until next bleed (est.)';
+  // BC awareness
+  if(bc.suppresses){
+    hero.classList.add('dimmed');
+    caveat.classList.add('show');
+    caveat.innerHTML="☾ "+bc.note;
+  }else{
+    hero.classList.remove('dimmed');
+    caveat.classList.remove('show');
+  }
+}
+
+function renderRing(){
+  const svg=document.getElementById('ring');const len=state.cycleLen;
+  const ds=daysSince(state.periodStart);
+  const dayInCycle=ds===null?null:((ds%len)+len)%len;
+  const cx=110,cy=110,r=86;
+  const phases=[{s:0,e:5,c:"var(--wine)"},{s:5,e:len-16,c:"var(--sage)"},
+    {s:len-16,e:len-12,c:"var(--gold)"},{s:len-12,e:len,c:"var(--rust)"}];
+  let html="";
+  phases.forEach(ph=>{const a0=(ph.s/len)*2*Math.PI-Math.PI/2,a1=(ph.e/len)*2*Math.PI-Math.PI/2;
+    const x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0),x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+    const lg=(ph.e-ph.s)/len>0.5?1:0;
+    html+=`<path d="M${x0} ${y0} A${r} ${r} 0 ${lg} 1 ${x1} ${y1}" fill="none" stroke="${ph.c}" stroke-width="14" stroke-linecap="round" opacity="0.9"/>`;});
+  if(dayInCycle!==null){
+    const a=(dayInCycle/len)*2*Math.PI-Math.PI/2;
+    const mx=cx+r*Math.cos(a),my=cy+r*Math.sin(a);
+    html+=`<circle cx="${mx}" cy="${my}" r="11" fill="var(--cream)"/>`;
+    html+=`<text x="${cx}" y="${cy-4}" text-anchor="middle" font-family="var(--font-d)" font-style="italic" font-size="30" fill="var(--cream)">${dayInCycle+1}</text>`;
+    html+=`<text x="${cx}" y="${cy+18}" text-anchor="middle" font-size="11" letter-spacing="2" fill="var(--cream)" opacity=".7">DAY</text>`;
+  }else{
+    html+=`<text x="${cx}" y="${cy+6}" text-anchor="middle" font-family="var(--font-d)" font-style="italic" font-size="18" fill="var(--cream)" opacity=".7">set up to begin</text>`;
+  }
+  svg.innerHTML=html;
+}
+
+function renderInfo(){
+  const ds=daysSince(state.periodStart);
+  const card=document.getElementById('infoCard');
+  if(ds===null){
+    document.getElementById('icPhase').textContent="Set up to see your hormones";
+    document.getElementById('icDays').textContent="";
+    document.getElementById('hormoneRow').innerHTML="";
+    document.getElementById('icBody').innerHTML="Once you log your last period, Aluna shows what estrogen and progesterone are doing right now.";
+    document.getElementById('icDetail').classList.remove('show');
+    return;
+  }
+  const len=state.cycleLen;
+  const dayInCycle=((ds%len)+len)%len;
+  const key=phaseKeyFor(dayInCycle,len);
+  const p=PHASES[key];
+  document.getElementById('icPhase').textContent=p.name+" — "+p.eyebrow;
+  document.getElementById('icDays').textContent="Day "+(dayInCycle+1)+" of ~"+len;
+  document.getElementById('hormoneRow').innerHTML=
+    `<div class="hbar"><div class="hname">Estrogen</div><div class="htrack"><div class="hfill" style="width:${p.e}%;background:linear-gradient(90deg,var(--gold),var(--amber))"></div></div></div>
+     <div class="hbar"><div class="hname">Progesterone</div><div class="htrack"><div class="hfill" style="width:${p.p}%;background:linear-gradient(90deg,var(--berry),var(--wine))"></div></div></div>`;
+  document.getElementById('icBody').innerHTML=p.brief;
+  const det=document.getElementById('icDetail');
+  det.innerHTML=`<h4>What you might notice</h4><ul>${p.expect.map(x=>`<li>${x}</li>`).join("")}</ul>
+    <h4>Gentle support</h4><ul>${p.tips.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+  det.classList.toggle('show',state.detail);
+  document.getElementById('infoToggle').textContent=state.detail?"Brief":"Detailed";
+}
+
+const SYMPTOMS=["Cramps","Tender","Tired","Energised","Moody","Calm","Headache","Bloated","Craving","Focused","Restless","Glowy"];
+function renderCells(){
+  const wrap=document.getElementById('cells');const t=iso(today());
+  const log=state.logs[t]?.symptoms||[];wrap.innerHTML="";
+  SYMPTOMS.forEach(s=>{const b=document.createElement('button');
+    b.className="cell"+(log.includes(s)?" on":"");b.textContent=s;
+    b.onclick=()=>{b.classList.toggle('on');b.classList.remove('pulse');void b.offsetWidth;b.classList.add('pulse')};
+    wrap.appendChild(b);});
+}
+function renderHistory(){
+  const wrap=document.getElementById('history');const len=state.cycleLen;
+  wrap.innerHTML="";
+  if(!state.periodStart){wrap.innerHTML='<span style="font-size:12.5px;opacity:.6">Your logged days will appear here.</span>';return;}
+  const start=new Date(state.periodStart+"T00:00:00");
+  for(let i=0;i<len;i++){const d=new Date(start.getTime()+i*DAY);if(d>today())break;
+    const key=iso(d);const log=state.logs[key];const el=document.createElement('div');
+    el.className="hist-day"+(log?(log.period?" period":(log.symptoms&&log.symptoms.length?" logged":"")):"");
+    el.textContent=d.getDate();wrap.appendChild(el);}
+}
+function renderAll(){renderHero();renderRing();renderInfo();renderCells();renderHistory();}
+
+/* ---------------- Interactions ---------------- */
+document.getElementById('infoToggle').onclick=()=>{state.detail=!state.detail;save();renderInfo();};
+document.getElementById('saveBtn').onclick=()=>{
+  const t=iso(today());const on=[...document.querySelectorAll('.cell.on')].map(c=>c.textContent);
+  state.logs[t]={...(state.logs[t]||{}),symptoms:on};save();
+  const n=document.getElementById('saveNote');n.classList.add('show');setTimeout(()=>n.classList.remove('show'),1800);
+  renderHistory();
+};
+
+const scrim=document.getElementById('scrim');
+function openSheet(){
+  document.getElementById('dateIn').value=state.periodStart||iso(today());
+  document.querySelectorAll('#lenSeg button').forEach(b=>b.classList.toggle('sel',+b.dataset.len===state.cycleLen));
+  // build BC list
+  const list=document.getElementById('bcList');list.innerHTML="";
+  Object.entries(BC_TYPES).forEach(([k,v])=>{const b=document.createElement('button');
+    b.className="bc-opt"+(state.bc===k?" sel":"");b.dataset.bc=k;
+    b.innerHTML=`<div class="t">${v.t}</div><div class="d">${v.d}</div>`;
+    b.onclick=()=>{list.querySelectorAll('.bc-opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')};
+    list.appendChild(b);});
+  scrim.classList.add('open');
+}
+document.getElementById('settingsBtn').onclick=openSheet;
+document.getElementById('periodBtn').onclick=openSheet;
+document.getElementById('sheetCancel').onclick=()=>scrim.classList.remove('open');
+scrim.onclick=e=>{if(e.target===scrim)scrim.classList.remove('open')};
+document.getElementById('lenSeg').onclick=e=>{if(e.target.dataset.len){
+  document.querySelectorAll('#lenSeg button').forEach(b=>b.classList.remove('sel'));e.target.classList.add('sel')}};
+document.getElementById('sheetSave').onclick=()=>{
+  const dval=document.getElementById('dateIn').value;
+  const len=+document.querySelector('#lenSeg button.sel').dataset.len;
+  const bc=document.querySelector('.bc-opt.sel')?.dataset.bc||"none";
+  if(dval){state.periodStart=dval;
+    state.logs[dval]={...(state.logs[dval]||{}),period:true,symptoms:state.logs[dval]?.symptoms||[]};}
+  state.cycleLen=len;state.bc=bc;
+  save();scrim.classList.remove('open');renderAll();
+};
+
+(async()=>{
+  document.getElementById('today').textContent=new Date().toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
+  try{await openDB();await load();}catch(e){console.warn("DB unavailable",e);}
+  renderAll();
+})();
+</script>
+
+
+</body></html>

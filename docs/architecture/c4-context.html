@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aluna — C4 System Context (L1)</title>
+<style>
+  :root {
+    --fg: #0f172a;
+    --muted: #64748b;
+    --border: #cbd5e1;
+    --bg: #ffffff;
+    --canvas: #f8fafc;
+    --client: #bac8ff;
+    --vercel: #dbe4ff;
+    --r2: #ffd8a8;
+    --cloudrun: #b2f2bb;
+    --claude: #fcc2d7;
+    --neon: #c0eb75;
+    --resend: #ffe066;
+    --google: #eebefa;
+    --blue: #1971c2;
+    --orange: #e8590c;
+    --green: #2f9e44;
+    --amber: #f08c00;
+    --purple: #9c36b5;
+  }
+  html, body { margin: 0; background: var(--canvas); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  .canvas { background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+    padding: 8px; overflow: auto; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  svg { display: block; width: 100%; height: auto; }
+  .node rect { stroke: var(--fg); stroke-width: 2; rx: 12; ry: 12; }
+  .node .title { font-weight: 600; font-size: 15px; fill: var(--fg); }
+  .node .meta  { font-size: 12px; fill: var(--muted); }
+  .edge { stroke-width: 2; fill: none; }
+  .edge.dashed { stroke-dasharray: 6 4; }
+  .edge-label { font-size: 12px; font-weight: 500;
+    paint-order: stroke; stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+  .blue   { stroke: var(--blue);   } .blue-fill   { fill: var(--blue);   }
+  .orange { stroke: var(--orange); } .orange-fill { fill: var(--orange); }
+  .green  { stroke: var(--green);  } .green-fill  { fill: var(--green);  }
+  .amber  { stroke: var(--amber);  } .amber-fill  { fill: var(--amber);  }
+  .purple { stroke: var(--purple); } .purple-fill { fill: var(--purple); }
+  .legend { margin-top: 24px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .legend-card { background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
+  .legend-card h3 { font-size: 13px; margin: 0 0 4px;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Aluna — System Context</h1>
+  <p class="sub">C4 Level 1 · cycle-tracking PWA with local-first health data</p>
+
+  <div class="canvas">
+    <svg viewBox="0 0 1200 460" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow-blue"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="blue-fill"/></marker>
+        <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="orange-fill"/></marker>
+        <marker id="arrow-green"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="green-fill"/></marker>
+        <marker id="arrow-amber"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="amber-fill"/></marker>
+        <marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="purple-fill"/></marker>
+      </defs>
+
+      <g class="node">
+        <rect x="60" y="120" width="220" height="90" fill="var(--client)"/>
+        <text class="title" x="170" y="158" text-anchor="middle">User</text>
+        <text class="meta" x="170" y="178" text-anchor="middle">tracks cycle &amp; symptoms</text>
+      </g>
+
+      <g class="node">
+        <rect x="460" y="120" width="220" height="90" fill="var(--vercel)"/>
+        <text class="title" x="570" y="155" text-anchor="middle">Aluna</text>
+        <text class="meta" x="570" y="175" text-anchor="middle">cycle-tracking PWA</text>
+        <text class="meta" x="570" y="191" text-anchor="middle">deployed on Vercel</text>
+      </g>
+
+      <g class="node">
+        <rect x="900" y="120" width="220" height="90" fill="var(--google)"/>
+        <text class="title" x="1010" y="158" text-anchor="middle">Google OAuth</text>
+        <text class="meta" x="1010" y="178" text-anchor="middle">identity provider</text>
+      </g>
+
+      <g class="node">
+        <rect x="60" y="320" width="220" height="90" fill="var(--client)"/>
+        <text class="title" x="170" y="358" text-anchor="middle">Partner</text>
+        <text class="meta" x="170" y="378" text-anchor="middle">read-only share link</text>
+      </g>
+
+      <g class="node">
+        <rect x="900" y="320" width="220" height="90" fill="var(--cloudrun)"/>
+        <text class="title" x="1010" y="355" text-anchor="middle">Browser Push Service</text>
+        <text class="meta" x="1010" y="375" text-anchor="middle">Chrome → Google FCM</text>
+        <text class="meta" x="1010" y="391" text-anchor="middle">Safari → Apple APNs</text>
+      </g>
+
+      <path class="edge blue" d="M 280 165 L 460 165" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="300" y="155">1. tracks cycle &amp; logs · HTTPS</text>
+
+      <path class="edge purple dashed" d="M 680 165 L 900 165" marker-end="url(#arrow-purple)"/>
+      <text class="edge-label purple-fill" x="710" y="155">2. Google sign-in · OAuth 2.0</text>
+
+      <path class="edge green" d="M 570 210 V 270 H 1010 V 320" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="720" y="262">3. period reminders · Web Push</text>
+
+      <path class="edge orange" d="M 280 365 L 460 365" marker-end="url(#arrow-orange)"/>
+      <text class="edge-label orange-fill" x="290" y="355">views share snapshot · HTTPS</text>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-card">
+      <h3>System boundary</h3>
+      Aluna is one product: a mobile-first PWA. Cycle logs and symptoms stay in the browser (IndexedDB). The server handles sign-in, push delivery, and optional partner snapshots only.
+    </div>
+    <div class="legend-card">
+      <h3>Local-first health data</h3>
+      Personal health records never leave the device unless the user exports JSON or uploads a minimal partner snapshot. Google OAuth proves identity — passwords are never stored.
+    </div>
+    <div class="legend-card">
+      <h3>Partner access</h3>
+      Partners open an opaque link (<code>/share/[token]</code>) and see a server-held snapshot — not live IndexedDB data and no partner login required.
+    </div>
+  </div>
+</div>
+</body>
+</html>

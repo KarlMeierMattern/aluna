@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aluna — Partner Sharing Flow (Sequence)</title>
+<style>
+  :root {
+    --fg: #0f172a;
+    --muted: #64748b;
+    --border: #cbd5e1;
+    --bg: #ffffff;
+    --canvas: #f8fafc;
+    --client: #bac8ff;
+    --vercel: #dbe4ff;
+    --neon: #c0eb75;
+    --blue: #1971c2;
+    --orange: #e8590c;
+    --purple: #9c36b5;
+  }
+  html, body { margin: 0; background: var(--canvas); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  .canvas { background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+    padding: 8px; overflow: auto; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  svg { display: block; width: 100%; height: auto; }
+  .participant rect { stroke: var(--fg); stroke-width: 2; rx: 8; ry: 8; }
+  .participant .title { font-weight: 600; font-size: 14px; fill: var(--fg); }
+  .lifeline { stroke: var(--border); stroke-width: 1.5; stroke-dasharray: 6 5; }
+  .msg { stroke-width: 2; fill: none; }
+  .msg-label { font-size: 12px; font-weight: 500;
+    paint-order: stroke; stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+  .return { stroke-dasharray: 6 4; }
+  .blue-fill { fill: var(--blue); } .orange-fill { fill: var(--orange); }
+  .purple-fill { fill: var(--purple); }
+  .blue { stroke: var(--blue); } .orange { stroke: var(--orange); }
+  .purple { stroke: var(--purple); }
+  .legend { margin-top: 24px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .legend-card { background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
+  .legend-card h3 { font-size: 13px; margin: 0 0 4px;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Aluna — Partner Sharing Flow</h1>
+  <p class="sub">Sequence diagram · owner uploads snapshot · partner reads via opaque token · no partner login</p>
+
+  <div class="canvas">
+    <svg viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="a-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--blue)"/></marker>
+        <marker id="a-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--orange)"/></marker>
+        <marker id="a-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--purple)"/></marker>
+      </defs>
+
+      <g class="participant"><rect x="30" y="30" width="130" height="48" fill="var(--client)"/><text class="title" x="95" y="60" text-anchor="middle">Owner</text></g>
+      <g class="participant"><rect x="200" y="30" width="150" height="48" fill="var(--client)"/><text class="title" x="275" y="55" text-anchor="middle">Owner browser</text><text class="title" x="275" y="70" text-anchor="middle" font-size="11" font-weight="400" fill="var(--muted)">IndexedDB</text></g>
+      <g class="participant"><rect x="390" y="30" width="150" height="48" fill="var(--vercel)"/><text class="title" x="465" y="60" text-anchor="middle">API routes</text></g>
+      <g class="participant"><rect x="580" y="30" width="130" height="48" fill="var(--neon)"/><text class="title" x="645" y="60" text-anchor="middle">Neon</text></g>
+      <g class="participant"><rect x="750" y="30" width="130" height="48" fill="var(--client)"/><text class="title" x="815" y="60" text-anchor="middle">Partner</text></g>
+
+      <line class="lifeline" x1="95" y1="78" x2="95" y2="580"/>
+      <line class="lifeline" x1="275" y1="78" x2="275" y2="580"/>
+      <line class="lifeline" x1="465" y1="78" x2="465" y2="580"/>
+      <line class="lifeline" x1="645" y1="78" x2="645" y2="580"/>
+      <line class="lifeline" x1="815" y1="78" x2="815" y2="580"/>
+
+      <text x="30" y="108" font-size="11" font-weight="600" fill="var(--muted)">ENABLE SHARING</text>
+
+      <!-- Owner enables share -->
+      <line class="msg blue" x1="95" y1="130" x2="275" y2="130" marker-end="url(#a-blue)"/>
+      <text class="msg-label blue-fill" x="110" y="122">1. enable partner sharing</text>
+
+      <line class="msg orange return" x1="275" y1="170" x2="95" y2="170" marker-end="url(#a-orange)"/>
+      <text class="msg-label orange-fill" x="110" y="162">read local cycle state</text>
+
+      <line class="msg blue" x1="275" y1="210" x2="465" y2="210" marker-end="url(#a-blue)"/>
+      <text class="msg-label blue-fill" x="310" y="202">2. POST /api/partner/share · JWT cookie</text>
+
+      <line class="msg blue" x1="465" y1="250" x2="645" y2="250" marker-end="url(#a-blue)"/>
+      <text class="msg-label blue-fill" x="480" y="242">3. upsert share_snapshots + partner_links token</text>
+
+      <line class="msg blue return" x1="465" y1="290" x2="95" y2="290" marker-end="url(#a-blue)"/>
+      <text class="msg-label blue-fill" x="120" y="282">4. return share URL /share/[token]</text>
+
+      <text x="30" y="330" font-size="11" font-weight="600" fill="var(--muted)">PARTNER VIEWS</text>
+
+      <line class="msg purple" x1="815" y1="355" x2="465" y2="355" marker-end="url(#a-purple)"/>
+      <text class="msg-label purple-fill" x="540" y="347">5. GET /share/[token] page load</text>
+
+      <line class="msg purple" x1="465" y1="395" x2="645" y2="395" marker-end="url(#a-purple)"/>
+      <text class="msg-label purple-fill" x="480" y="387">6. GET /api/partner/[token] · validate active</text>
+
+      <line class="msg purple return" x1="645" y1="435" x2="815" y2="435" marker-end="url(#a-purple)"/>
+      <text class="msg-label purple-fill" x="660" y="427">7. snapshot JSON (phase, countdown, scopes)</text>
+
+      <text x="30" y="475" font-size="11" font-weight="600" fill="var(--muted)">REVOKE</text>
+
+      <line class="msg blue" x1="95" y1="500" x2="465" y2="500" marker-end="url(#a-blue)"/>
+      <text class="msg-label blue-fill" x="200" y="492">8. PATCH active=false (or DELETE)</text>
+
+      <line class="msg blue" x1="465" y1="540" x2="645" y2="540" marker-end="url(#a-blue)"/>
+      <text class="msg-label blue-fill" x="480" y="532">token invalidated immediately</text>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-card">
+      <h3>Snapshot, not live sync</h3>
+      The partner sees what the owner last uploaded — cycle day, phase name, countdown, optional fertile window. Re-sync happens when the owner saves settings or daily logs (if sharing is enabled).
+    </div>
+    <div class="legend-card">
+      <h3>Minimal data on server</h3>
+      Neon never receives full symptom logs or notes. Only the scoped fields the owner chose to share are stored in <code>share_snapshots</code>.
+    </div>
+    <div class="legend-card">
+      <h3>Opaque token</h3>
+      The share link uses a random server-side token — not a JWT in the URL — so revocation is instant when <code>partner_links.active</code> is set to false.
+    </div>
+  </div>
+</div>
+</body>
+</html>

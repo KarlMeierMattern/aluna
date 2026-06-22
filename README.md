@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Aluna
 
-## Getting Started
+Cycle tracking PWA — your inner tide.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Next.js 16** PWA (Serwist)
+- **IndexedDB** — all cycle logs stay on device
+- **Neon Postgres** — Google auth (`users`/`accounts`), push subscriptions, partner share snapshots
+- **Auth.js** — Google SSO, JWT in httpOnly cookie
+- **Web Push** — Vercel cron → `/api/cron/reminders`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Copy `.env.example` → `.env.local` and fill in values
+2. Create Google OAuth client in [GCP Console](https://console.cloud.google.com/) (Web application; redirect URI `http://localhost:3000/api/auth/callback/google`)
+3. Create Neon database and set `DATABASE_URL`
+4. Push schema: `npm run db:push`
+5. Generate VAPID keys: `npx web-push generate-vapid-keys`
+6. Run: `npm run dev` (uses webpack for Serwist compatibility)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+- `npm run dev` — local dev
+- `npm run build` — production build
+- `npm run db:push` — sync Drizzle schema to Neon
 
-To learn more about Next.js, take a look at the following resources:
+## Data model
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Where | What |
+|---|---|
+| IndexedDB | period start, cycle length, BC, daily logs, symptoms, notes |
+| Neon | user identity, push endpoints, partner link tokens + share snapshots |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Export/import JSON backup from the app UI.
 
-## Deploy on Vercel
+## Architecture
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open in a browser (offline, self-contained):
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [System context (C4 L1)](./docs/architecture/c4-context.html)
+- [Containers (C4 L2)](./docs/architecture/c4-container.html)
+- [Components (C4 L3)](./docs/architecture/c4-component.html)
+- [Auth flow (sequence)](./docs/architecture/auth-sequence.html)
+- [Push notifications (sequence)](./docs/architecture/push-sequence.html)
+- [Partner sharing (sequence)](./docs/architecture/partner-sequence.html)
+
+## Reference
+
+Original static prototype: [Aluna.html](./Aluna.html)

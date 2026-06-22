@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aluna — C4 Containers (L2)</title>
+<style>
+  :root {
+    --fg: #0f172a;
+    --muted: #64748b;
+    --border: #cbd5e1;
+    --bg: #ffffff;
+    --canvas: #f8fafc;
+    --client: #bac8ff;
+    --vercel: #dbe4ff;
+    --r2: #ffd8a8;
+    --cloudrun: #b2f2bb;
+    --claude: #fcc2d7;
+    --neon: #c0eb75;
+    --resend: #ffe066;
+    --google: #eebefa;
+    --blue: #1971c2;
+    --orange: #e8590c;
+    --green: #2f9e44;
+    --amber: #f08c00;
+    --purple: #9c36b5;
+  }
+  html, body { margin: 0; background: var(--canvas); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  .canvas { background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+    padding: 8px; overflow: auto; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  svg { display: block; width: 100%; height: auto; }
+  .node rect { stroke: var(--fg); stroke-width: 2; rx: 12; ry: 12; }
+  .node .title { font-weight: 600; font-size: 15px; fill: var(--fg); }
+  .node .meta  { font-size: 12px; fill: var(--muted); }
+  .edge { stroke-width: 2; fill: none; }
+  .edge.dashed { stroke-dasharray: 6 4; }
+  .edge-label { font-size: 12px; font-weight: 500;
+    paint-order: stroke; stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+  .blue   { stroke: var(--blue);   } .blue-fill   { fill: var(--blue);   }
+  .orange { stroke: var(--orange); } .orange-fill { fill: var(--orange); }
+  .green  { stroke: var(--green);  } .green-fill  { fill: var(--green);  }
+  .amber  { stroke: var(--amber);  } .amber-fill  { fill: var(--amber);  }
+  .purple { stroke: var(--purple); } .purple-fill { fill: var(--purple); }
+  .legend { margin-top: 24px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .legend-card { background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
+  .legend-card h3 { font-size: 13px; margin: 0 0 4px;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Aluna — Containers</h1>
+  <p class="sub">C4 Level 2 · deployable units and protocols</p>
+
+  <div class="canvas">
+    <svg viewBox="0 0 1200 680" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow-blue"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="blue-fill"/></marker>
+        <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="orange-fill"/></marker>
+        <marker id="arrow-green"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="green-fill"/></marker>
+        <marker id="arrow-amber"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="amber-fill"/></marker>
+        <marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="purple-fill"/></marker>
+      </defs>
+
+      <g class="node">
+        <rect x="60" y="120" width="220" height="90" fill="var(--client)"/>
+        <text class="title" x="170" y="150" text-anchor="middle">Browser PWA</text>
+        <text class="meta" x="170" y="170" text-anchor="middle">Next.js 16 + React</text>
+        <text class="meta" x="170" y="186" text-anchor="middle">IndexedDB · Serwist SW</text>
+      </g>
+
+      <g class="node">
+        <rect x="460" y="120" width="220" height="90" fill="var(--vercel)"/>
+        <text class="title" x="570" y="150" text-anchor="middle">API Routes</text>
+        <text class="meta" x="570" y="170" text-anchor="middle">Vercel serverless</text>
+        <text class="meta" x="570" y="186" text-anchor="middle">auth · push · partner · cron</text>
+      </g>
+
+      <g class="node">
+        <rect x="900" y="120" width="220" height="90" fill="var(--neon)"/>
+        <text class="title" x="1010" y="155" text-anchor="middle">Neon Postgres</text>
+        <text class="meta" x="1010" y="175" text-anchor="middle">serverless Postgres</text>
+        <text class="meta" x="1010" y="191" text-anchor="middle">Drizzle ORM</text>
+      </g>
+
+      <g class="node">
+        <rect x="60" y="320" width="220" height="90" fill="var(--amber)" fill-opacity="0.35" stroke="var(--fg)"/>
+        <text class="title" x="170" y="355" text-anchor="middle">Vercel Cron</text>
+        <text class="meta" x="170" y="375" text-anchor="middle">hourly scheduler</text>
+        <text class="meta" x="170" y="391" text-anchor="middle">→ /api/cron/reminders</text>
+      </g>
+
+      <g class="node">
+        <rect x="460" y="320" width="220" height="90" fill="var(--google)"/>
+        <text class="title" x="570" y="358" text-anchor="middle">Google OAuth</text>
+        <text class="meta" x="570" y="378" text-anchor="middle">GCP credentials</text>
+      </g>
+
+      <g class="node">
+        <rect x="900" y="320" width="220" height="90" fill="var(--cloudrun)"/>
+        <text class="title" x="1010" y="355" text-anchor="middle">Browser Push Service</text>
+        <text class="meta" x="1010" y="375" text-anchor="middle">FCM / APNs relay</text>
+      </g>
+
+      <!-- 1. Browser → API auth & partner -->
+      <path class="edge blue" d="M 280 165 L 460 165" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="290" y="155">1. sign in · partner API · HTTPS</text>
+
+      <!-- 2. API → Neon -->
+      <path class="edge blue" d="M 680 165 L 900 165" marker-end="url(#arrow-blue)"/>
+      <text class="edge-label blue-fill" x="730" y="155">2. users · push subs · snapshots</text>
+
+      <!-- Auth: API ↔ Google -->
+      <path class="edge purple dashed" d="M 570 210 V 270 H 570 V 320" marker-end="url(#arrow-purple)"/>
+      <text class="edge-label purple-fill" x="580" y="268">OAuth callback</text>
+
+      <!-- 3. Cron → API -->
+      <path class="edge amber" d="M 280 365 L 460 365" marker-end="url(#arrow-amber)"/>
+      <text class="edge-label amber-fill" x="290" y="355">3. hourly · CRON_SECRET</text>
+
+      <!-- 4. API → Push service -->
+      <path class="edge green" d="M 680 365 L 900 365" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="710" y="355">4. web-push · VAPID · HTTPS</text>
+
+      <!-- 5. Push → Browser SW -->
+      <path class="edge green" d="M 900 365 C 640 365 340 250 170 210" marker-end="url(#arrow-green)"/>
+      <text class="edge-label green-fill" x="420" y="285">5. push event → service worker</text>
+
+      <!-- Local IndexedDB loop -->
+      <path class="edge orange dashed" d="M 110 210 C 40 250 40 300 110 210" marker-end="url(#arrow-orange)"/>
+      <text class="edge-label orange-fill" x="18" y="268">cycle data · IndexedDB</text>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-card">
+      <h3>Data split</h3>
+      <strong>IndexedDB</strong> holds all health data (logs, symptoms, notes, settings). <strong>Neon</strong> holds identity (<code>users</code>/<code>accounts</code>), push subscription endpoints, and partner share snapshots only.
+    </div>
+    <div class="legend-card">
+      <h3>Auth model</h3>
+      Auth.js issues a JWT in an httpOnly <code>Secure</code> <code>SameSite=Lax</code> cookie. No OAuth tokens or session rows are persisted in Neon.
+    </div>
+    <div class="legend-card">
+      <h3>Push pipeline</h3>
+      Vercel Cron triggers <code>/api/cron/reminders</code> (batched, max ~200 users/run). The function reads subscriptions from Neon and calls the browser push service; the Serwist service worker shows the notification.
+    </div>
+    <div class="legend-card">
+      <h3>Hosting</h3>
+      App, API routes, and cron all deploy to <strong>Vercel</strong>. Database on <strong>Neon</strong>. Google OAuth client in <strong>GCP Console</strong>.
+    </div>
+  </div>
+</div>
+</body>
+</html>

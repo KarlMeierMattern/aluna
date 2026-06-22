@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aluna — Auth Flow (Sequence)</title>
+<style>
+  :root {
+    --fg: #0f172a;
+    --muted: #64748b;
+    --border: #cbd5e1;
+    --bg: #ffffff;
+    --canvas: #f8fafc;
+    --client: #bac8ff;
+    --vercel: #dbe4ff;
+    --neon: #c0eb75;
+    --google: #eebefa;
+    --blue: #1971c2;
+    --orange: #e8590c;
+    --green: #2f9e44;
+    --purple: #9c36b5;
+  }
+  html, body { margin: 0; background: var(--canvas); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  .canvas { background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+    padding: 8px; overflow: auto; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  svg { display: block; width: 100%; height: auto; }
+  .participant rect { stroke: var(--fg); stroke-width: 2; rx: 8; ry: 8; }
+  .participant .title { font-weight: 600; font-size: 14px; fill: var(--fg); }
+  .lifeline { stroke: var(--border); stroke-width: 1.5; stroke-dasharray: 6 5; }
+  .msg { stroke-width: 2; fill: none; }
+  .msg-label { font-size: 12px; font-weight: 500;
+    paint-order: stroke; stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+  .return { stroke-dasharray: 6 4; }
+  .blue   { stroke: var(--blue);   } .blue-fill   { fill: var(--blue);   }
+  .orange { stroke: var(--orange); } .orange-fill { fill: var(--orange); }
+  .green  { stroke: var(--green);  } .green-fill  { fill: var(--green);  }
+  .purple { stroke: var(--purple); } .purple-fill { fill: var(--purple); }
+  .legend { margin-top: 24px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .legend-card { background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
+  .legend-card h3 { font-size: 13px; margin: 0 0 4px;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Aluna — Google Sign-In Flow</h1>
+  <p class="sub">Sequence diagram · Auth.js JWT session · health data stays in IndexedDB</p>
+
+  <div class="canvas">
+    <svg viewBox="0 0 1000 640" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow-blue"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--blue)"/></marker>
+        <marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--purple)"/></marker>
+        <marker id="arrow-green"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--green)"/></marker>
+        <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--orange)"/></marker>
+      </defs>
+
+      <!-- Participants -->
+      <g class="participant">
+        <rect x="30" y="30" width="130" height="48" fill="var(--client)"/>
+        <text class="title" x="95" y="60" text-anchor="middle">User</text>
+      </g>
+      <g class="participant">
+        <rect x="220" y="30" width="150" height="48" fill="var(--vercel)"/>
+        <text class="title" x="295" y="60" text-anchor="middle">Next.js</text>
+      </g>
+      <g class="participant">
+        <rect x="430" y="30" width="130" height="48" fill="var(--google)"/>
+        <text class="title" x="495" y="60" text-anchor="middle">Google</text>
+      </g>
+      <g class="participant">
+        <rect x="620" y="30" width="130" height="48" fill="var(--neon)"/>
+        <text class="title" x="685" y="60" text-anchor="middle">Neon</text>
+      </g>
+      <g class="participant">
+        <rect x="810" y="30" width="150" height="48" fill="var(--client)"/>
+        <text class="title" x="885" y="55" text-anchor="middle">IndexedDB</text>
+        <text class="title" x="885" y="70" text-anchor="middle" font-size="11" font-weight="400" fill="var(--muted)">(browser)</text>
+      </g>
+
+      <!-- Lifelines -->
+      <line class="lifeline" x1="95" y1="78" x2="95" y2="600"/>
+      <line class="lifeline" x1="295" y1="78" x2="295" y2="600"/>
+      <line class="lifeline" x1="495" y1="78" x2="495" y2="600"/>
+      <line class="lifeline" x1="685" y1="78" x2="685" y2="600"/>
+      <line class="lifeline" x1="885" y1="78" x2="885" y2="600"/>
+
+      <!-- 1. Sign in -->
+      <line class="msg blue" x1="95" y1="120" x2="295" y2="120" marker-end="url(#arrow-blue)"/>
+      <text class="msg-label blue-fill" x="130" y="112">1. Sign in with Google</text>
+
+      <!-- 2. OAuth redirect -->
+      <line class="msg purple" x1="295" y1="165" x2="495" y2="165" marker-end="url(#arrow-purple)"/>
+      <text class="msg-label purple-fill" x="330" y="157">2. OAuth redirect</text>
+
+      <!-- 3. User authenticates at Google (implicit) -->
+      <line class="msg purple return" x1="495" y1="210" x2="295" y2="210" marker-end="url(#arrow-purple)"/>
+      <text class="msg-label purple-fill" x="330" y="202">3. authorization code + profile</text>
+
+      <!-- 4. find/create user -->
+      <line class="msg blue" x1="295" y1="255" x2="685" y2="255" marker-end="url(#arrow-blue)"/>
+      <text class="msg-label blue-fill" x="380" y="247">4. find or create users + accounts row</text>
+
+      <!-- 5. row returned -->
+      <line class="msg blue return" x1="685" y1="300" x2="295" y2="300" marker-end="url(#arrow-blue)"/>
+      <text class="msg-label blue-fill" x="400" y="292">user record</text>
+
+      <!-- 6. Set cookie -->
+      <line class="msg purple" x1="295" y1="345" x2="95" y2="345" marker-end="url(#arrow-purple)"/>
+      <text class="msg-label purple-fill" x="120" y="337">5. Set httpOnly JWT session cookie</text>
+
+      <!-- 7. Load app -->
+      <line class="msg blue" x1="95" y1="400" x2="295" y2="400" marker-end="url(#arrow-blue)"/>
+      <text class="msg-label blue-fill" x="130" y="392">6. Load app (authenticated)</text>
+
+      <!-- 8. Serve UI -->
+      <line class="msg blue return" x1="295" y1="445" x2="95" y2="445" marker-end="url(#arrow-blue)"/>
+      <text class="msg-label blue-fill" x="130" y="437">app shell + assets</text>
+
+      <!-- 9. IndexedDB read/write (browser-local) -->
+      <line class="msg orange" x1="95" y1="500" x2="885" y2="500" marker-end="url(#arrow-orange)"/>
+      <text class="msg-label orange-fill" x="380" y="492">7. Read / write cycle data locally</text>
+
+      <!-- Self-loop note on IndexedDB -->
+      <path class="msg orange return" d="M 885 530 C 920 530 920 570 885 570 C 850 570 850 530 885 530" marker-end="url(#arrow-orange)"/>
+      <text class="msg-label orange-fill" x="700" y="565">keyed by user.id · no server round-trip</text>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-card">
+      <h3>Session</h3>
+      Auth.js uses a <strong>JWT strategy</strong> — the session lives in an httpOnly cookie, not in Neon. No <code>sessions</code> table and no Google OAuth tokens are stored.
+    </div>
+    <div class="legend-card">
+      <h3>Neon writes</h3>
+      On first sign-in, Drizzle adapter creates a <code>users</code> row and an <code>accounts</code> row linking the Google account id. Returning users are matched by provider + account id.
+    </div>
+    <div class="legend-card">
+      <h3>After login</h3>
+      All cycle logs, symptoms, and notes go to IndexedDB only. The JWT cookie is used to gate server routes (push subscribe, partner share) — not to authorize IndexedDB reads.
+    </div>
+  </div>
+</div>
+</body>
+</html>
