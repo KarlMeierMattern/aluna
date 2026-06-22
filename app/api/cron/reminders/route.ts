@@ -9,8 +9,9 @@ const BATCH_SIZE = 200;
 function setupVapid() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
-  if (!publicKey || !privateKey) return false;
-  webpush.setVapidDetails("mailto:aluna@example.com", publicKey, privateKey);
+  const contact = process.env.VAPID_CONTACT_EMAIL;
+  if (!publicKey || !privateKey || !contact) return false;
+  webpush.setVapidDetails(`mailto:${contact}`, publicKey, privateKey);
   return true;
 }
 
